@@ -135,7 +135,7 @@ public class TimeRuleView extends View {
     /**
      * Default mScale is 1
      */
-    private final float mOneSecondGap = dp2px(12) / 60f;
+    private final float mOneSecondGap = dp2px(10) / 60f;
     /**
      * Interval corresponding to 1s, it is better to estimate
      */
@@ -220,7 +220,7 @@ public class TimeRuleView extends View {
         initAttrs(context, attrs);
 
         init(context);
-        initScaleGestureDetector(context);
+        //initScaleGestureDetector(context);
 
         mTextHalfWidth = mTextPaint.measureText("00h") * .5f;
         ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
@@ -375,77 +375,77 @@ public class TimeRuleView extends View {
         setMeasuredDimension(mWidth, mHeight);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        final int actionIndex = event.getActionIndex();
-        int pointerId = event.getPointerId(actionIndex);
-        final int actionMasked = event.getActionMasked();
-        final int action = event.getAction();
-        final int pointerCount = event.getPointerCount();
-        logD("onTouchEvent: isScaling=%b, actionIndex=%d, pointerId=%d, actionMasked=%d, action=%d, pointerCount=%d",
-                isScaling, actionIndex, pointerId, actionMasked, action, pointerCount);
-        final int x = (int) event.getX();
-        final int y = (int) event.getY();
-        mScaleGestureDetector.onTouchEvent(event);
-
-        if (mVelocityTracker == null) {
-            mVelocityTracker = VelocityTracker.obtain();
-        }
-        mVelocityTracker.addMovement(event);
-        switch (actionMasked) {
-            case MotionEvent.ACTION_DOWN:
-                isMoving = false;
-                mInitialX = x;
-                if (!mScroller.isFinished()) {
-                    mScroller.forceFinished(true);
-                }
-                break;
-            case MotionEvent.ACTION_POINTER_DOWN:
-                // Prohibit sliding as long as the second finger is pressed
-                isScaling = true;
-                isMoving = false;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (isScaling) {
-                    break;
-                }
-                int dx = x - mLastX;
-                if (!isMoving) {
-                    final int dy = y - mLastY;
-                    if (Math.abs(x - mInitialX) <= SCROLL_SLOP || Math.abs(dx) <= Math.abs(dy)) {
-                        break;
-                    }
-                    isMoving = true;
-                }
-                mCurrentDistance -= dx;
-                computeTime();
-                break;
-            case MotionEvent.ACTION_UP:
-                if (isScaling || !isMoving) {
-                    break;
-                }
-                mVelocityTracker.computeCurrentVelocity(1000, MAX_VELOCITY);
-                final int xVelocity = (int) mVelocityTracker.getXVelocity();
-                if (Math.abs(xVelocity) >= MIN_VELOCITY) {
-                    // Inertial sliding
-                    final int maxDistance = (int) (MAX_TIME_VALUE / mUnitGap * mUnitGap);
-                    mScroller.fling((int) mCurrentDistance, 0, -xVelocity, 0, 0, maxDistance, 0, 0);
-                    invalidate();
-                }
-                break;
-            case MotionEvent.ACTION_POINTER_UP:
-                // One of the two fingers is raised to allow sliding. At the same time, the current position of the unlifted phone is assigned to the initial X
-                isScaling = false;
-                int restIndex = actionIndex == 0 ? 1 : 0;
-                mInitialX = (int) event.getX(restIndex);
-                break;
-            default:
-                break;
-        }
-        mLastX = x;
-        mLastY = y;
-        return true;
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        final int actionIndex = event.getActionIndex();
+//        int pointerId = event.getPointerId(actionIndex);
+//        final int actionMasked = event.getActionMasked();
+//        final int action = event.getAction();
+//        final int pointerCount = event.getPointerCount();
+//        logD("onTouchEvent: isScaling=%b, actionIndex=%d, pointerId=%d, actionMasked=%d, action=%d, pointerCount=%d",
+//                isScaling, actionIndex, pointerId, actionMasked, action, pointerCount);
+//        final int x = (int) event.getX();
+//        final int y = (int) event.getY();
+//        mScaleGestureDetector.onTouchEvent(event);
+//
+//        if (mVelocityTracker == null) {
+//            mVelocityTracker = VelocityTracker.obtain();
+//        }
+//        mVelocityTracker.addMovement(event);
+//        switch (actionMasked) {
+//            case MotionEvent.ACTION_DOWN:
+//                isMoving = false;
+//                mInitialX = x;
+//                if (!mScroller.isFinished()) {
+//                    mScroller.forceFinished(true);
+//                }
+//                break;
+//            case MotionEvent.ACTION_POINTER_DOWN:
+//                // Prohibit sliding as long as the second finger is pressed
+//                isScaling = true;
+//                isMoving = false;
+//                break;
+//            case MotionEvent.ACTION_MOVE:
+//                if (isScaling) {
+//                    break;
+//                }
+//                int dx = x - mLastX;
+//                if (!isMoving) {
+//                    final int dy = y - mLastY;
+//                    if (Math.abs(x - mInitialX) <= SCROLL_SLOP || Math.abs(dx) <= Math.abs(dy)) {
+//                        break;
+//                    }
+//                    isMoving = true;
+//                }
+//                mCurrentDistance -= dx;
+//                computeTime();
+//                break;
+//            case MotionEvent.ACTION_UP:
+//                if (isScaling || !isMoving) {
+//                    break;
+//                }
+//                mVelocityTracker.computeCurrentVelocity(1000, MAX_VELOCITY);
+//                final int xVelocity = (int) mVelocityTracker.getXVelocity();
+//                if (Math.abs(xVelocity) >= MIN_VELOCITY) {
+//                    // Inertial sliding
+//                    final int maxDistance = (int) (MAX_TIME_VALUE / mUnitGap * mUnitGap);
+//                    mScroller.fling((int) mCurrentDistance, 0, -xVelocity, 0, 0, maxDistance, 0, 0);
+//                    invalidate();
+//                }
+//                break;
+//            case MotionEvent.ACTION_POINTER_UP:
+//                // One of the two fingers is raised to allow sliding. At the same time, the current position of the unlifted phone is assigned to the initial X
+//                isScaling = false;
+//                int restIndex = actionIndex == 0 ? 1 : 0;
+//                mInitialX = (int) event.getX(restIndex);
+//                break;
+//            default:
+//                break;
+//        }
+//        mLastX = x;
+//        mLastY = y;
+//        return true;
+//    }
 
     private void computeTime() {
         // No need to turn float
