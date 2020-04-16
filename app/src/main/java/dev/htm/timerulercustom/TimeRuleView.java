@@ -88,7 +88,7 @@ public class TimeRuleView extends View {
     private float indicatorWidth;
 
     /**
-     * The unit seconds corresponding to the smallest unit, there are four levels: 10s, 1min, 5min, 15min
+     * The unit seconds corresponding to the smallest unit, there are four levels: 10s, 1min, 5min, 15min, 30min
      * Index values ​​corresponding to { @link #mPerTextCounts} and { @link #mPerCountScaleThresholds}
      * <p>
      * Can be combined and optimized into an array
@@ -97,7 +97,10 @@ public class TimeRuleView extends View {
 //            10, 10, 10, 10,
 //            60, 60,
 //            5 * 60, 5 * 60
-            15 * 60, 15 * 60, 15 * 60, 15 * 60, 15 * 60, 15 * 60
+//            15 * 60, 15 * 60, 15 * 60, 15 * 60, 15 * 60, 15 * 60
+            30 * 60, 30 * 60, 30 * 60, 30 * 60, 30 * 60, 30 * 60
+//            60 * 60, 60 * 60, 60 * 60, 60 * 60, 60 * 60, 60 * 60
+
     };
 
     /**
@@ -109,6 +112,7 @@ public class TimeRuleView extends View {
 //            5 * 60, 10 * 60, // 1min/unit: 5min, 10min
 //            20 * 60, 30 * 60, // 5min/unit: 20min, 30min
             3600, 5 * 3600, 3 * 3600, 4 * 3600, 5 * 3600, 6 * 3600 // 15min/unit
+
     };
 
     /**
@@ -131,7 +135,7 @@ public class TimeRuleView extends View {
     /**
      * Default mScale is 1
      */
-    private final float mOneSecondGap = dp2px(12) / 60f;
+    private final float mOneSecondGap = dp2px(8) / 60f;
     /**
      * Interval corresponding to 1s, it is better to estimate
      */
@@ -139,7 +143,7 @@ public class TimeRuleView extends View {
     /**
      * Interval corresponding to the current minimum unit second value
      */
-    private int mPerTextCountIndex = 5;
+    private int mPerTextCountIndex = 0;
     /**
      * The number of seconds represented by one division. 1min by default
      */
@@ -218,7 +222,7 @@ public class TimeRuleView extends View {
         init(context);
         initScaleGestureDetector(context);
 
-        mTextHalfWidth = mTextPaint.measureText("00:00") * .5f;
+        mTextHalfWidth = mTextPaint.measureText("00h") * .5f;
         ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
         SCROLL_SLOP = viewConfiguration.getScaledTouchSlop();
         MIN_VELOCITY = viewConfiguration.getScaledMinimumFlingVelocity();
@@ -238,7 +242,7 @@ public class TimeRuleView extends View {
         minuteLen = ta.getDimension(R.styleable.TimeRuleView_minuteLen, dp2px(5));
         hourLen = ta.getDimension(R.styleable.TimeRuleView_hourLen, dp2px(10));
         gradationTextColor = ta.getColor(R.styleable.TimeRuleView_gradationTextColor, Color.GRAY);
-        gradationTextSize = ta.getDimension(R.styleable.TimeRuleView_gradationTextSize, sp2px(12));
+        gradationTextSize = ta.getDimension(R.styleable.TimeRuleView_gradationTextSize, sp2px(6));
         gradationTextGap = ta.getDimension(R.styleable.TimeRuleView_gradationTextGap, dp2px(2));
         currentTime = ta.getInt(R.styleable.TimeRuleView_currentTime, 0);
 //        indicatorTriangleSideLen = ta.getDimension(R.styleable.TimeRuleView_indicatorTriangleSideLen, dp2px(15));
@@ -366,7 +370,7 @@ public class TimeRuleView extends View {
         if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST) {
             mHeight = dp2px(60);
         }
-        mHalfWidth = mWidth >> 1;
+        mHalfWidth = 30;
 
         setMeasuredDimension(mWidth, mHeight);
     }
@@ -458,6 +462,7 @@ public class TimeRuleView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         // background
+
         canvas.drawColor(bgColor);
 
         // scale
@@ -577,16 +582,11 @@ public class TimeRuleView extends View {
             timeValue = 0;
         }
         int hour = timeValue / 3600;
-        int minute = timeValue % 3600 / 60;
         StringBuilder sb = new StringBuilder();
         if (hour < 10) {
             sb.append('0');
         }
-        sb.append(hour).append(':');
-        if (minute < 10) {
-            sb.append('0');
-        }
-        sb.append(minute);
+        sb.append(hour + "h");
         return sb.toString();
     }
 
