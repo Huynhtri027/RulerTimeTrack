@@ -97,8 +97,8 @@ public class TimeRuleView extends View {
 //            10, 10, 10, 10,
 //            60, 60,
 //            5 * 60, 5 * 60
-//            15 * 60, 15 * 60, 15 * 60, 15 * 60, 15 * 60, 15 * 60
-            30 * 60, 30 * 60, 30 * 60, 30 * 60, 30 * 60, 30 * 60
+            15 * 60, 15 * 60, 15 * 60, 15 * 60, 15 * 60, 15 * 60
+//            30 * 60, 30 * 60, 30 * 60, 30 * 60, 30 * 60, 30 * 60
 //            60 * 60, 60 * 60, 60 * 60, 60 * 60, 60 * 60, 60 * 60
 
     };
@@ -135,7 +135,7 @@ public class TimeRuleView extends View {
     /**
      * Default mScale is 1
      */
-    private final float mOneSecondGap = dp2px(8) / 60f;
+    private final float mOneSecondGap = dp2px(12) / 60f;
     /**
      * Interval corresponding to 1s, it is better to estimate
      */
@@ -143,7 +143,7 @@ public class TimeRuleView extends View {
     /**
      * Interval corresponding to the current minimum unit second value
      */
-    private int mPerTextCountIndex = 0;
+    private int mPerTextCountIndex = 5;
     /**
      * The number of seconds represented by one division. 1min by default
      */
@@ -242,7 +242,7 @@ public class TimeRuleView extends View {
         minuteLen = ta.getDimension(R.styleable.TimeRuleView_minuteLen, dp2px(5));
         hourLen = ta.getDimension(R.styleable.TimeRuleView_hourLen, dp2px(10));
         gradationTextColor = ta.getColor(R.styleable.TimeRuleView_gradationTextColor, Color.GRAY);
-        gradationTextSize = ta.getDimension(R.styleable.TimeRuleView_gradationTextSize, sp2px(6));
+        gradationTextSize = ta.getDimension(R.styleable.TimeRuleView_gradationTextSize, sp2px(18));
         gradationTextGap = ta.getDimension(R.styleable.TimeRuleView_gradationTextGap, dp2px(2));
         currentTime = ta.getInt(R.styleable.TimeRuleView_currentTime, 0);
 //        indicatorTriangleSideLen = ta.getDimension(R.styleable.TimeRuleView_indicatorTriangleSideLen, dp2px(15));
