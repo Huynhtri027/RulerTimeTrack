@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Common Properties-->
+    <!--Background color-->
+    <attr name="bgColor" format="reference|color" />
+    <!--Scale color-->
+    <attr name="gradationColor" format="reference|color" />
+    <!--Scale font color-->
+    <attr name="textColor" format="reference|color" />
+    <!--Scale font size-->
+    <attr name="textSize" format="reference|dimension" />
+    <!--Middle pointer line color-->
+    <attr name="indicatorLineColor" format="reference|color" />
+    <!--Middle pointer line width-->
+    <attr name="indicatorLineWidth" format="reference|dimension" />
+
+    <!--Time Ruler Control-->
+    <declare-styleable name="TimeRuleView">
+        <attr name="bgColor" />
+        <!--Scale color-->
+        <attr name="gradationColor" />
+        <!--Height of time block-->
+        <attr name="partHeight" format="dimension|reference" />
+        <!--Color of time block-->
+        <attr name="partColor" format="color|reference" />
+        <!--Scale width-->
+        <attr name="gradationWidth" format="dimension|reference" />
+        <!--Length of second scale-->
+        <attr name="secondLen" format="dimension|reference" />
+        <!--Length of minute scale-->
+        <attr name="minuteLen" format="dimension|reference" />
+        <!--The length of the hour scale-->
+        <attr name="hourLen" format="dimension|reference" />
+        <!--Scale value color-->
+        <attr name="gradationTextColor" format="color|reference" />
+        <!--Scale value-->
+        <attr name="gradationTextSize" format="dimension|reference" />
+        <!-- The distance between the scale value and the hour scale-->
+        <attr name="gradationTextGap" format="dimension|reference" />
+        <!--Current time, unit: s-->
+        <attr name="currentTime" format="integer|reference" />
+        <!--Middle pointer line color-->
+        <attr name="indicatorLineColor" />
+        <!--Middle pointer line width-->
+        <attr name="indicatorLineWidth" />
+        <!--The length of the triangle on the middle pointer-->
+        <attr name="indicatorTriangleSideLen" format="dimension|reference" />
+
+    </declare-styleable>
+
+    <declare-styleable name="TimelineView">
+        <attr name="timeRange" format="string"/>
+        <attr name="fractionTextInterval" format="integer"/>
+        <attr name="barWidth" format="dimension"/>
+        <attr name="barColorAvailable" format="color"/>
+        <attr name="barColorNotAvailable" format="color"/>
+        <attr name="barColorHighlight" format="color"/>
+        <attr name="fractionPrimaryTextColor" format="color"/>
+        <attr name="fractionSecondaryTextColor" format="color"/>
+        <attr name="fractionTextSize" format="dimension"/>
+        <attr name="fractionLineWidth" format="dimension"/>
+        <attr name="fractionLineLength" format="dimension"/>
+        <attr name="fractionLineColor" format="color"/>
+    </declare-styleable>
+
+</resources>
