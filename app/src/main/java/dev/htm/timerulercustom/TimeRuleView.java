@@ -135,7 +135,7 @@ public class TimeRuleView extends View {
     /**
      * Default mScale is 1
      */
-    private final float mOneSecondGap = dp2px(10) / 60f;
+    private float mOneSecondGap = dp2px(10) / 60f;
     /**
      * Interval corresponding to 1s, it is better to estimate
      */
@@ -371,6 +371,9 @@ public class TimeRuleView extends View {
             mHeight = dp2px(60);
         }
         mHalfWidth = 30;
+        mHalfWidth = 30;
+        mOneSecondGap = (mWidth / (24 * 2 * 2 + 5)/ 60f);
+        mUnitGap = mOneSecondGap * 60;
 
         setMeasuredDimension(mWidth, mHeight);
     }
