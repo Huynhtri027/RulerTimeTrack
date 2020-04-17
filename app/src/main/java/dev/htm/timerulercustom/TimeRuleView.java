@@ -1,6 +1,7 @@
 package dev.htm.timerulercustom;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,9 +11,7 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Scroller;
@@ -21,7 +20,6 @@ import androidx.annotation.IntRange;
 import androidx.annotation.Nullable;
 
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -112,7 +110,6 @@ public class TimeRuleView extends View {
 //            5 * 60, 10 * 60, // 1min/unit: 5min, 10min
 //            20 * 60, 30 * 60, // 5min/unit: 20min, 30min
             3600, 5 * 3600, 3 * 3600, 4 * 3600, 5 * 3600, 6 * 3600 // 15min/unit
-
     };
 
     /**
@@ -123,9 +120,9 @@ public class TimeRuleView extends View {
      */
     @SuppressWarnings("all")
     private float[] mPerCountScaleThresholds = {
-            6f, 3.6f, 1.8f, 1.5f, // 10s / unit: max, 1min, 2min, 4min
-            0.8f, 0.4f,   // 1min/unit: 5min, 10min
-            0.25f, 0.125f, // 5min/unit: 20min, 30min
+//            6f, 3.6f, 1.8f, 1.5f, // 10s / unit: max, 1min, 2min, 4min
+//            0.8f, 0.4f,   // 1min/unit: 5min, 10min
+//            0.25f, 0.125f, // 5min/unit: 20min, 30min
             0.07f, 0.04f, 0.03f, 0.025f, 0.02f, 0.015f // 15min/unit: 1h, 2h, 3h, 4h, 5h, 6h
     };
     /**
@@ -135,7 +132,7 @@ public class TimeRuleView extends View {
     /**
      * Default mScale is 1
      */
-    private float mOneSecondGap = dp2px(10) / 60f;
+    private float mOneSecondGap = dp2px(12) / 60f;
     /**
      * Interval corresponding to 1s, it is better to estimate
      */
@@ -154,10 +151,6 @@ public class TimeRuleView extends View {
      */
     private float mTextHalfWidth;
 
-    private int SCROLL_SLOP;
-    private int MIN_VELOCITY;
-    private int MAX_VELOCITY;
-
     /**
      * The distance between the current time and 00:00
      */
@@ -168,7 +161,6 @@ public class TimeRuleView extends View {
     private TextPaint mTextPaint;
     private Path mTrianglePath;
     private Scroller mScroller;
-    private VelocityTracker mVelocityTracker;
 
     /**
      * Zoom gesture detector
@@ -177,11 +169,6 @@ public class TimeRuleView extends View {
 
     private int mWidth, mHeight;
     private int mHalfWidth;
-
-    private int mInitialX;
-    private int mLastX, mLastY;
-    private boolean isMoving;
-    private boolean isScaling;
 
     private List<TimePart> mTimePartList;
     private OnTimeChangedListener mListener;
@@ -209,6 +196,10 @@ public class TimeRuleView extends View {
          * End time must be greater than { @link #startTime}
          */
         public int endTime;
+
+        public int colorSet;
+
+
     }
 
     public TimeRuleView(Context context, @Nullable AttributeSet attrs) {
@@ -220,34 +211,27 @@ public class TimeRuleView extends View {
         initAttrs(context, attrs);
 
         init(context);
-        //initScaleGestureDetector(context);
 
         mTextHalfWidth = mTextPaint.measureText("00h") * .5f;
         ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
-        SCROLL_SLOP = viewConfiguration.getScaledTouchSlop();
-        MIN_VELOCITY = viewConfiguration.getScaledMinimumFlingVelocity();
-        MAX_VELOCITY = viewConfiguration.getScaledMaximumFlingVelocity();
 
         calculateValues();
     }
 
     private void initAttrs(Context context, AttributeSet attrs) {
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.TimeRuleView);
-        bgColor = ta.getColor(R.styleable.TimeRuleView_bgColor, Color.parseColor("#EEEEEE"));
-        gradationColor = ta.getColor(R.styleable.TimeRuleView_gradationColor, Color.GRAY);
-        partHeight = ta.getDimension(R.styleable.TimeRuleView_partHeight, dp2px(20));
+        bgColor = ta.getColor(R.styleable.TimeRuleView_bgColor, Color.parseColor("#f5f8f5"));
+        gradationColor = ta.getColor(R.styleable.TimeRuleView_gradationColor, Color.BLACK);
+        partHeight = ta.getDimension(R.styleable.TimeRuleView_partHeight, dp2px(16));
         partColor = ta.getColor(R.styleable.TimeRuleView_partColor, partColor);
-        gradationWidth = ta.getDimension(R.styleable.TimeRuleView_gradationWidth, 1);
+        gradationWidth = ta.getDimension(R.styleable.TimeRuleView_gradationWidth, 2);
         secondLen = ta.getDimension(R.styleable.TimeRuleView_secondLen, dp2px(3));
         minuteLen = ta.getDimension(R.styleable.TimeRuleView_minuteLen, dp2px(5));
-        hourLen = ta.getDimension(R.styleable.TimeRuleView_hourLen, dp2px(10));
-        gradationTextColor = ta.getColor(R.styleable.TimeRuleView_gradationTextColor, Color.GRAY);
-        gradationTextSize = ta.getDimension(R.styleable.TimeRuleView_gradationTextSize, sp2px(18));
+        hourLen = ta.getDimension(R.styleable.TimeRuleView_hourLen, dp2px(15));
+        gradationTextColor = ta.getColor(R.styleable.TimeRuleView_gradationTextColor, Color.BLACK);
+        gradationTextSize = ta.getDimension(R.styleable.TimeRuleView_gradationTextSize, sp2px(15));
         gradationTextGap = ta.getDimension(R.styleable.TimeRuleView_gradationTextGap, dp2px(2));
         currentTime = ta.getInt(R.styleable.TimeRuleView_currentTime, 0);
-//        indicatorTriangleSideLen = ta.getDimension(R.styleable.TimeRuleView_indicatorTriangleSideLen, dp2px(15));
-//        indicatorWidth = ta.getDimension(R.styleable.TimeRuleView_indicatorLineWidth, dp2px(1));
-//        indicatorColor = ta.getColor(R.styleable.TimeRuleView_indicatorLineColor, Color.RED);
         ta.recycle();
     }
 
@@ -267,100 +251,6 @@ public class TimeRuleView extends View {
         mScroller = new Scroller(context);
     }
 
-    private void initScaleGestureDetector(Context context) {
-        mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.OnScaleGestureListener() {
-
-            /**
-             * Zoom is triggered (will be called 0 or more times),
-             * If it returns true, it means that the current zoom event has been processed, and the detector will re-accumulate the zoom factor
-             * Returning false will continue to accumulate scaling factors.
-             */
-            @Override
-            public boolean onScale(ScaleGestureDetector detector) {
-                final float scaleFactor = detector.getScaleFactor();
-                logD("onScale...focusX=%f, focusY=%f, scaleFactor=%f",
-                        detector.getFocusX(), detector.getFocusY(), scaleFactor);
-
-                final float maxScale = mPerCountScaleThresholds[0];
-                final float minScale = mPerCountScaleThresholds[mPerCountScaleThresholds.length - 1];
-                if (scaleFactor > 1 && mScale >= maxScale) {
-                    // has been enlarged to the maximum
-                    return true;
-                } else if (scaleFactor < 1 && mScale <= minScale) {
-                    // has been reduced to a minimum
-                    return true;
-                }
-
-                mScale *= scaleFactor;
-                mScale = Math.max(minScale, Math.min(maxScale, mScale));
-                mPerTextCountIndex = findScaleIndex(mScale);
-
-                mUnitSecond = mUnitSeconds[mPerTextCountIndex];
-                mUnitGap = mScale * mOneSecondGap * mUnitSecond;
-                logD("onScale: mScale=%f, mPerTextCountIndex=%d, mUnitSecond=%d, mUnitGap=%f",
-                        mScale, mPerTextCountIndex, mUnitSecond, mUnitGap);
-
-                mCurrentDistance = (float) currentTime / mUnitSecond * mUnitGap;
-                invalidate();
-                return true;
-            }
-
-            @Override
-            public boolean onScaleBegin(ScaleGestureDetector detector) {
-                logD("onScaleBegin...");
-                isScaling = true;
-                return true;
-            }
-
-            @Override
-            public void onScaleEnd(ScaleGestureDetector detector) {
-                isScaling = false;
-                logD("onScaleEnd...");
-            }
-        });
-
-        // Adjust the minimum span value. The default value is 27mm (> = 32mm for sw600dp), which is too large and the effect is not good
-        Class clazz = ScaleGestureDetector.class;
-        int newMinSpan = ViewConfiguration.get(context).getScaledTouchSlop();
-        try {
-            Field mMinSpanField = clazz.getDeclaredField("mMinSpan");
-            mMinSpanField.setAccessible(true);
-            mMinSpanField.set(mScaleGestureDetector, newMinSpan);
-            mMinSpanField.setAccessible(false);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Finds the index value corresponding to the zoom value
-     */
-    private int findScaleIndex(float scale) {
-        final int size = mPerCountScaleThresholds.length;
-        int min = 0;
-        int max = size - 1;
-        int mid = (min + max) >> 1;
-        while (!(scale >= mPerCountScaleThresholds[mid] && scale < mPerCountScaleThresholds[mid - 1])) {
-            if (scale >= mPerCountScaleThresholds[mid - 1]) {
-                // Because the value goes to the cell and the index goes to the big one, it cannot be mid -1
-                max = mid;
-            } else {
-                min = mid + 1;
-            }
-            mid = (min + max) >> 1;
-            if (min >= max) {
-                break;
-            }
-            if (mid == 0) {
-                break;
-            }
-        }
-        return mid;
-    }
-
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         mWidth = MeasureSpec.getSize(widthMeasureSpec);
@@ -370,85 +260,15 @@ public class TimeRuleView extends View {
         if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST) {
             mHeight = dp2px(60);
         }
-        mHalfWidth = 30;
-        mHalfWidth = 30;
-        mOneSecondGap = (mWidth / (24 * 2 * 2 + 5)/ 60f);
+
+        int orientation = this.getResources().getConfiguration().orientation;
+        // Checks the orientation of the screen
+        mHalfWidth = orientation == Configuration.ORIENTATION_LANDSCAPE ? 60 : 40;
+        mOneSecondGap = (mWidth / (24 * 2 * 2 + 5) / 60f);
         mUnitGap = mOneSecondGap * 60;
 
         setMeasuredDimension(mWidth, mHeight);
     }
-
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        final int actionIndex = event.getActionIndex();
-//        int pointerId = event.getPointerId(actionIndex);
-//        final int actionMasked = event.getActionMasked();
-//        final int action = event.getAction();
-//        final int pointerCount = event.getPointerCount();
-//        logD("onTouchEvent: isScaling=%b, actionIndex=%d, pointerId=%d, actionMasked=%d, action=%d, pointerCount=%d",
-//                isScaling, actionIndex, pointerId, actionMasked, action, pointerCount);
-//        final int x = (int) event.getX();
-//        final int y = (int) event.getY();
-//        mScaleGestureDetector.onTouchEvent(event);
-//
-//        if (mVelocityTracker == null) {
-//            mVelocityTracker = VelocityTracker.obtain();
-//        }
-//        mVelocityTracker.addMovement(event);
-//        switch (actionMasked) {
-//            case MotionEvent.ACTION_DOWN:
-//                isMoving = false;
-//                mInitialX = x;
-//                if (!mScroller.isFinished()) {
-//                    mScroller.forceFinished(true);
-//                }
-//                break;
-//            case MotionEvent.ACTION_POINTER_DOWN:
-//                // Prohibit sliding as long as the second finger is pressed
-//                isScaling = true;
-//                isMoving = false;
-//                break;
-//            case MotionEvent.ACTION_MOVE:
-//                if (isScaling) {
-//                    break;
-//                }
-//                int dx = x - mLastX;
-//                if (!isMoving) {
-//                    final int dy = y - mLastY;
-//                    if (Math.abs(x - mInitialX) <= SCROLL_SLOP || Math.abs(dx) <= Math.abs(dy)) {
-//                        break;
-//                    }
-//                    isMoving = true;
-//                }
-//                mCurrentDistance -= dx;
-//                computeTime();
-//                break;
-//            case MotionEvent.ACTION_UP:
-//                if (isScaling || !isMoving) {
-//                    break;
-//                }
-//                mVelocityTracker.computeCurrentVelocity(1000, MAX_VELOCITY);
-//                final int xVelocity = (int) mVelocityTracker.getXVelocity();
-//                if (Math.abs(xVelocity) >= MIN_VELOCITY) {
-//                    // Inertial sliding
-//                    final int maxDistance = (int) (MAX_TIME_VALUE / mUnitGap * mUnitGap);
-//                    mScroller.fling((int) mCurrentDistance, 0, -xVelocity, 0, 0, maxDistance, 0, 0);
-//                    invalidate();
-//                }
-//                break;
-//            case MotionEvent.ACTION_POINTER_UP:
-//                // One of the two fingers is raised to allow sliding. At the same time, the current position of the unlifted phone is assigned to the initial X
-//                isScaling = false;
-//                int restIndex = actionIndex == 0 ? 1 : 0;
-//                mInitialX = (int) event.getX(restIndex);
-//                break;
-//            default:
-//                break;
-//        }
-//        mLastX = x;
-//        mLastY = y;
-//        return true;
-//    }
 
     private void computeTime() {
         // No need to turn float
@@ -465,8 +285,7 @@ public class TimeRuleView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         // background
-
-        canvas.drawColor(bgColor);
+        //canvas.drawColor(bgColor);
 
         // scale
         drawRule(canvas);
@@ -562,7 +381,7 @@ public class TimeRuleView extends View {
         }
         // Don't use a rectangle, just use a straight line to draw
         mPaint.setStrokeWidth(partHeight);
-        mPaint.setColor(partColor);
+        //mPaint.setColor(partColor);
         float start, end;
         final float halfPartHeight = partHeight * .5f;
         final float secondGap = mUnitGap / mUnitSecond;
@@ -570,6 +389,7 @@ public class TimeRuleView extends View {
             TimePart timePart = mTimePartList.get(i);
             start = mHalfWidth - mCurrentDistance + timePart.startTime * secondGap;
             end = mHalfWidth - mCurrentDistance + timePart.endTime * secondGap;
+            mPaint.setColor(timePart.colorSet);
             canvas.drawLine(start, halfPartHeight, end, halfPartHeight, mPaint);
         }
     }
@@ -589,7 +409,7 @@ public class TimeRuleView extends View {
         if (hour < 10) {
             sb.append('0');
         }
-        sb.append(hour + "h");
+        sb.append(hour).append("h");
         return sb.toString();
     }
 
@@ -634,7 +454,7 @@ public class TimeRuleView extends View {
     @SuppressWarnings("all")
     private void logD(String format, Object... args) {
         if (LOG_ENABLE) {
-            Log.d("RuleView", String.format("ads" + format, args));
+            Log.d("RuleView", String.format("view" + format, args));
         }
     }
 
