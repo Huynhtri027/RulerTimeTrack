@@ -386,11 +386,29 @@ public class TimeRuleView extends View {
         final float halfPartHeight = partHeight * .5f;
         final float secondGap = mUnitGap / mUnitSecond;
         for (int i = 0, size = mTimePartList.size(); i < size; i++) {
-            TimePart timePart = mTimePartList.get(i);
-            start = mHalfWidth - mCurrentDistance + timePart.startTime * secondGap;
-            end = mHalfWidth - mCurrentDistance + timePart.endTime * secondGap;
-            mPaint.setColor(timePart.colorSet);
-            canvas.drawLine(start, halfPartHeight, end, halfPartHeight, mPaint);
+            TimePart timePart= mTimePartList.get(i);
+            if(timePart.endTime > TimeUnit.DAYS.toSeconds(1)){
+                logD("Skip part! cause: Only Support during 24h");
+//                throw new RuntimeException("Only Support during 24h");
+            }
+            if(timePart.endTime < timePart.startTime){
+                //part1
+                start = mHalfWidth - mCurrentDistance + timePart.startTime * secondGap;
+                end = mHalfWidth - mCurrentDistance + TimeUnit.DAYS.toSeconds(1) * secondGap;
+                mPaint.setColor(timePart.colorSet);
+                canvas.drawLine(start, halfPartHeight, end, halfPartHeight, mPaint);
+
+                //part2
+                start = mHalfWidth - mCurrentDistance + 0 * secondGap;
+                end = mHalfWidth - mCurrentDistance + timePart.endTime * secondGap;
+                mPaint.setColor(timePart.colorSet);
+                canvas.drawLine(start, halfPartHeight, end, halfPartHeight, mPaint);
+            } else{
+                start = mHalfWidth - mCurrentDistance + timePart.startTime * secondGap;
+                end = mHalfWidth - mCurrentDistance + timePart.endTime * secondGap;
+                mPaint.setColor(timePart.colorSet);
+                canvas.drawLine(start, halfPartHeight, end, halfPartHeight, mPaint);
+            }
         }
     }
 
