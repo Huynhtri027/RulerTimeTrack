@@ -30,6 +30,6 @@ public class MainActivity extends AppCompatActivity {
             part.colorSet = Color.BLUE;
             list.add(part);
         }
-        binding.timeView.setTimePartList(list, color);
+        binding.timeView.setTimePartList(list);
     }
 }

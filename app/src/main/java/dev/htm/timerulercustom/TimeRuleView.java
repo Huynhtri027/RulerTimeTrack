@@ -472,9 +472,8 @@ public class TimeRuleView extends View {
      *
      * @param timePartList time block collection
      */
-    public void setTimePartList(List<TimePart> timePartList, int partColor) {
+    public void setTimePartList(List<TimePart> timePartList) {
         this.mTimePartList = timePartList;
-        this.partColor = partColor;
         postInvalidate();
     }
 
