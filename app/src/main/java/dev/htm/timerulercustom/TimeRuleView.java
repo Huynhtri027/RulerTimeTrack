@@ -390,6 +390,7 @@ public class TimeRuleView extends View {
             if(timePart.endTime > TimeUnit.DAYS.toSeconds(1)){
                 logD("Skip part! cause: Only Support during 24h");
 //                throw new RuntimeException("Only Support during 24h");
+                continue;
             }
             if(timePart.endTime < timePart.startTime){
                 //part1
